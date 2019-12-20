@@ -3,14 +3,11 @@
 /**
  * Plugin Name: Interactive Map
  * Plugin URI: add git hub link here
- * Description: Create an interactive map of locations.
+ * Description: Creates an interactive map of places.
  * Version: 0.1
  * Author: Taylor Quinn
  * Author URI: https://tquinn.dev
  */
-
-//  For the sake of brevity this plugin will live in one file. 
-//  Usually I would create a best practice folder architecture.
 
 
 class IM_Plugins
@@ -218,6 +215,7 @@ class IM_Plugins
 
     public static function im_ui_block()
     {
+        // Verifying basic functionality. Once that's figured out we will use backbone.js and maps api
         wp_enqueue_script(
             'im-ui-block-js',
             plugins_url('/js/map-ui.js', dirname(__FILE__)),
