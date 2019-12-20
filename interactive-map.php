@@ -31,7 +31,7 @@ class IM_Plugins
         add_action('rest_api_init', array($this, 'im_places_rest_endpoint'));
 
         // Gutenberg Map Block
-        add_action('enqueue_block_editor_assets', array('im_ui_block'));
+        add_action('enqueue_block_editor_assets', array($this, 'im_ui_block'));
 
         // Map Shortcode
         // TODO: Apply this for older site compatiblity
@@ -116,6 +116,8 @@ class IM_Plugins
 
     public static function im_inject_admin_autocomplete()
     {
+        global $post;
+        if ($post->post_type !== 'places') return;
 ?>
         <script>
             var placeSearch, autocomplete;
@@ -218,9 +220,13 @@ class IM_Plugins
         // Verifying basic functionality. Once that's figured out we will use backbone.js and maps api
         wp_enqueue_script(
             'im-ui-block-js',
-            plugins_url('/js/map-ui.js', dirname(__FILE__)),
+            plugin_dir_url(__FILE__) . '/js/map-ui.js',
             array('wp-blocks', 'wp-element')
         );
+
+        register_block_type('layouts/im-ui-block', array(
+            'editor_script' => 'im-ui-block-js',
+        ));
 
         // wp_enqueue_style(
         //     'im-ui-block-css',
