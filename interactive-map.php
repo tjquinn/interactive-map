@@ -27,6 +27,7 @@ class IM_Plugins
         add_action('add_meta_boxes', array($this, 'im_setup_admin_meta_collection'));
         add_action('save_post_places', array($this, 'im_save_admin_meta'));
         add_action('admin_footer', array($this, 'im_inject_admin_autocomplete'));
+        add_action('rest_api_init', array($this, 'im_places_rest_endpoint'));
     }
 
     public static function im_register_post_type()
@@ -174,6 +175,33 @@ class IM_Plugins
         </script>
         <script src="https://maps.googleapis.com/maps/api/js?key=<?php echo $this->api_key; ?>&libraries=places&callback=initAutocomplete" async defer></script>
 <?php
+    }
+
+    public static function im_places_rest_endpoint()
+    {
+        // wp-json/wp/v2/places
+        register_rest_route('wp/v2', '/places', array(
+            'methods' => 'GET',
+            'callback' => array($this, 'im_places_api'),
+        ));
+    }
+
+    public static function im_places_api()
+    {
+        global $wpdb;
+        $sql_query =   'SELECT ID, post_title FROM wp_posts 
+                        WHERE wp_posts.post_type = "places"
+                        AND wp_posts.post_status = "publish"';
+        $places = $wpdb->get_results($sql_query);
+        foreach ($places as $place) {
+            $metas = $wpdb->get_results('SELECT * FROM wp_postmeta 
+                                        WHERE wp_postmeta.post_id = ' . $place->ID);
+            foreach ($metas as $meta) {
+                $key = $meta->meta_key;
+                $places[$key] = $meta->meta_value;
+            }
+        }
+        return $places;
     }
 }
 
