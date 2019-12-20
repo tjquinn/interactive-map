@@ -18,7 +18,7 @@ class IM_Plugins
     public function __construct()
     {
         $this->version = 0.1;
-        $this->api_key = 'AIzaSyCeRCiSvf0kADsd_lmw8m0FTuYew6wulWA';
+        $this->api_key = 'XXXXXXXXX';
         add_action('init', array($this, 'im_register_post_type'));
         register_activation_hook(__FILE__, array($this, 'im_plugin_install'));
         add_filter('use_block_editor_for_post_type', array($this, 'im_disable_gutenberg'), 10, 2);
