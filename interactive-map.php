@@ -22,12 +22,23 @@ class IM_Plugins
         $this->api_key = 'XXXXXXXXXX';
         add_action('init', array($this, 'im_register_post_type'));
         register_activation_hook(__FILE__, array($this, 'im_plugin_install'));
-        add_filter('use_block_editor_for_post_type', array($this, 'im_disable_gutenberg'), 10, 2);
         register_deactivation_hook(__FILE__, array($this, 'im_plugin_deactivation'));
+
+        // Admin Setup
+        add_filter('use_block_editor_for_post_type', array($this, 'im_disable_gutenberg'), 10, 2);
         add_action('add_meta_boxes', array($this, 'im_setup_admin_meta_collection'));
         add_action('save_post_places', array($this, 'im_save_admin_meta'));
         add_action('admin_footer', array($this, 'im_inject_admin_autocomplete'));
+
+        //REST API
         add_action('rest_api_init', array($this, 'im_places_rest_endpoint'));
+
+        // Gutenberg Map Block
+        add_action('enqueue_block_editor_assets', array('im_ui_block'));
+
+        // Map Shortcode
+        // TODO: Apply this for older site compatiblity
+        add_shortcode('map', array($this, 'im_shortcode'));
     }
 
     public static function im_register_post_type()
@@ -90,6 +101,7 @@ class IM_Plugins
         echo '<input id="lat" name="lat_field" type="hidden" value="' . $lat_field . '" />';
         echo '<input id="lng" name="lng_field" type="hidden" value="' . $lng_field . '" />';
         echo '</div>';
+        new IM_UI;
     }
 
     public static function im_save_admin_meta($post_id)
@@ -203,6 +215,33 @@ class IM_Plugins
         }
         return $places;
     }
+
+    public static function im_ui_block()
+    {
+        wp_enqueue_script(
+            'im-ui-block-js',
+            plugins_url('/js/map-ui.js', dirname(__FILE__)),
+            array('wp-blocks', 'wp-element')
+        );
+
+        // wp_enqueue_style(
+        //     'im-ui-block-css',
+        //     plugins_url('/css/map-styles.css', dirname(__FILE__)),
+        //     array('wp-edit-blocks')
+        // );
+    }
+
+    public static function im_shortcode($params)
+    {
+        echo '<p>Coming Soon, please contact admin for timeline.</p>';
+    }
 }
 
 new IM_Plugins;
+
+class IM_UI
+{
+    public function __construct()
+    {
+    }
+}
