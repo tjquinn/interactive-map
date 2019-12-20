@@ -18,14 +18,15 @@ class IM_Plugins
     public function __construct()
     {
         $this->version = 0.1;
-        $this->api_key = 'XXXXXXXXX';
+        // TO DO: Create settings page to allow for users to apply their own api key.
+        $this->api_key = 'XXXXXXXXXX';
         add_action('init', array($this, 'im_register_post_type'));
         register_activation_hook(__FILE__, array($this, 'im_plugin_install'));
         add_filter('use_block_editor_for_post_type', array($this, 'im_disable_gutenberg'), 10, 2);
         register_deactivation_hook(__FILE__, array($this, 'im_plugin_deactivation'));
         add_action('add_meta_boxes', array($this, 'im_setup_admin_meta_collection'));
         add_action('save_post_places', array($this, 'im_save_admin_meta'));
-        add_action('admin_footer', array($this, 'im_enqueue_autocomplete'));
+        add_action('admin_footer', array($this, 'im_inject_admin_autocomplete'));
     }
 
     public static function im_register_post_type()
@@ -92,8 +93,6 @@ class IM_Plugins
 
     public static function im_save_admin_meta($post_id)
     {
-
-
         if (array_key_exists('place_field', $_POST)) {
             update_post_meta($post_id, 'place_field', $_POST['place_field']);
         }
@@ -105,7 +104,7 @@ class IM_Plugins
         }
     }
 
-    public static function im_enqueue_autocomplete()
+    public static function im_inject_admin_autocomplete()
     {
 ?>
         <script>
