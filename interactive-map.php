@@ -19,7 +19,7 @@ class IM_Plugins
     {
         $this->version = 0.1;
         // TO DO: Create settings page to allow for users to apply their own api key.
-        $this->api_key = 'AIzaSyCeRCiSvf0kADsd_lmw8m0FTuYew6wulWA';
+        $this->api_key = 'XXXXXXXXXX';
         add_action('init', array($this, 'im_register_post_type'));
         register_activation_hook(__FILE__, array($this, 'im_plugin_install'));
         register_deactivation_hook(__FILE__, array($this, 'im_plugin_deactivation'));
