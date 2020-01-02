@@ -35,6 +35,7 @@ class IM_Plugins
 
         // Gutenberg Map Block
         add_action('enqueue_block_editor_assets', array($this, 'im_ui_block'));
+        add_action('wp_enqueue_scripts', array($this, 'im_ui_block'));
 
         // Map Shortcode
         // TODO: Apply this for older site compatiblity
@@ -308,6 +309,18 @@ class IM_Plugins
         //     plugins_url('/css/map-styles.css', dirname(__FILE__)),
         //     array('wp-edit-blocks')
         // );
+    }
+
+    public static function im_font_end()
+    {
+        if (has_block('layouts/im-ui-block')) {
+            wp_enqueue_script(
+                'im-ui-block-js',
+                plugin_dir_url(__FILE__) . '/js/map-ui.js',
+                array(),
+                //filemtime( plugin_dir_url(__FILE__) . '/js/map-ui.js' )
+            );
+        }
     }
 
     public static function im_shortcode($params)

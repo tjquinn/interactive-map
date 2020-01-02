@@ -22,7 +22,7 @@
     height: "500px",
     width: "500px",
     margin: "2em auto",
-    background: "red",
+    background: "white",
     display: "block"
   };
 
