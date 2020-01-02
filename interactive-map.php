@@ -16,12 +16,15 @@ class IM_Plugins
     {
         $this->version = 0.1;
         // TO DO: Create settings page to allow for users to apply their own api key.
-        $this->api_key = 'XXXXXXXXXX';
+        $settings = get_option('im_settings');
+        $this->api_key = $settings['im_api_key'];
         add_action('init', array($this, 'im_register_post_type'));
         register_activation_hook(__FILE__, array($this, 'im_plugin_install'));
         register_deactivation_hook(__FILE__, array($this, 'im_plugin_deactivation'));
 
         // Admin Setup
+        add_action('admin_menu', array($this, 'im_add_admin_menu'));
+        add_action('admin_init', array($this, 'im_settings_init'));
         add_filter('use_block_editor_for_post_type', array($this, 'im_disable_gutenberg'), 10, 2);
         add_action('add_meta_boxes', array($this, 'im_setup_admin_meta_collection'));
         add_action('save_post_places', array($this, 'im_save_admin_meta'));
@@ -80,6 +83,67 @@ class IM_Plugins
         return $current_status;
     }
 
+    public static function im_add_admin_menu()
+    {
+        add_submenu_page('edit.php?post_type=places', 'Settings', 'Settings', 'manage_options', 'interactive_map', array($this, 'im_settings_page'));
+    }
+
+
+    public static function im_settings_init()
+    {
+
+        register_setting('mapSettings', 'im_settings');
+
+        add_settings_section(
+            'im_map_settings_section',
+            __('', 'interactive_map'),
+            array($this, 'im_settings_section_callback'),
+            'mapSettings'
+        );
+
+        add_settings_field(
+            'im_api_key',
+            __('API Key', 'interactive_map'),
+            array($this, 'im_api_key_render'),
+            'mapSettings',
+            'im_map_settings_section'
+        );
+    }
+
+
+    public static function im_api_key_render()
+    {
+        $options = get_option('im_settings');
+        echo '<input type="text" name="im_settings[im_api_key]" value="' . $options['im_api_key'] . '">';
+    }
+
+
+    public static function im_settings_section_callback()
+    {
+
+        echo __('Please add your Google Maps APIv3 Key below.', 'interactive_map');
+    }
+
+
+    public static function im_settings_page()
+    {
+
+?>
+        <form action='options.php' method='post'>
+
+            <h2>Google Api Key</h2>
+
+            <?php
+            settings_fields('mapSettings');
+            do_settings_sections('mapSettings');
+            submit_button();
+            ?>
+
+        </form>
+    <?php
+
+    }
+
     public static function im_setup_admin_meta_collection()
     {
         add_meta_box('place_field', 'Place', array($this, 'im_place_meta_box'), 'places', 'normal', 'default', $this->api_key);
@@ -103,6 +167,7 @@ class IM_Plugins
 
     public static function im_save_admin_meta($post_id)
     {
+        /* TODO: Refactor and add nonce */
         if (array_key_exists('place_field', $_POST)) {
             update_post_meta($post_id, 'place_field', $_POST['place_field']);
         }
@@ -118,7 +183,7 @@ class IM_Plugins
     {
         global $post;
         if ($post->post_type !== 'places') return;
-?>
+    ?>
         <script>
             var placeSearch, autocomplete;
 
@@ -195,10 +260,18 @@ class IM_Plugins
             'methods' => 'GET',
             'callback' => array($this, 'im_places_api'),
         ));
+
+        register_rest_route('wp/v2', '/places', array(
+            'methods' => 'GET',
+            'callback' => array($this, 'im_places_api'),
+        ));
     }
 
-    public static function im_places_api()
+    public static function im_places_api($params)
     {
+
+        if ($_GET['settings']) return get_option('im_settings');
+
         global $wpdb;
         $sql_query =   'SELECT ID, post_title FROM wp_posts 
                         WHERE wp_posts.post_type = "places"
@@ -224,9 +297,9 @@ class IM_Plugins
             array('wp-blocks', 'wp-element')
         );
 
-        register_block_type('layouts/im-ui-block', array(
-            'editor_script' => 'im-ui-block-js',
-        ));
+        register_block_type('layouts/im-ui-block', [
+            'editor_script' => 'im-ui-block-js'
+        ]);
 
         // wp_enqueue_style(
         //     'im-ui-block-css',
