@@ -277,12 +277,14 @@ class IM_Plugins
                         WHERE wp_posts.post_type = "places"
                         AND wp_posts.post_status = "publish"';
         $places = $wpdb->get_results($sql_query);
-        foreach ($places as $place) {
-            $metas = $wpdb->get_results('SELECT * FROM wp_postmeta 
-                                        WHERE wp_postmeta.post_id = ' . $place->ID);
+        foreach ($places as $index => $place) {
+            $metas = $wpdb->get_results('SELECT meta_key, meta_value FROM wp_postmeta 
+                                        WHERE wp_postmeta.post_id = ' . $place->ID
+                . ' AND wp_postmeta.meta_key IN ("place_field","lat_field","lng_field")');
+
             foreach ($metas as $meta) {
                 $key = $meta->meta_key;
-                $places[$key] = $meta->meta_value;
+                $places[$index]->$key = $meta->meta_value;
             }
         }
         return $places;
